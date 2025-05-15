@@ -1,15 +1,12 @@
-import pytest
-from app import app
-
-  @pytest.fixture
-  def client():
-      app.config['TESTING'] = True
-      with app.test_client() as client:
-          yield client
-
-  def test_time_endpoint(client):
-      response = client.get('/time')
-      data = response.get_json()
-      assert response.status_code == 200
-      assert 'time' in data
-      assert data['time'] != 0
+def test_metrics_route(client):
+    # Сброс счётчика перед тестом (если нужно)
+    client.get('/metrics')  # Сбросить счётчик, если это предусмотрено логикой приложения
+    
+    # Делаем 5 запросов к /time
+    for _ in range(5):
+        client.get('/time')
+    
+    # Проверяем /metrics
+    response = client.get('/metrics')
+    assert response.status_code == 200
+    assert response.json['count'] == 5  # Ожидаем 5 запросов
