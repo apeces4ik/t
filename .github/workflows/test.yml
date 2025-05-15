@@ -1,9 +1,24 @@
-name: Test Runner
-on: [workflow_dispatch]
+name: Run Tests
+on: [push, pull_request]
 
 jobs:
   test:
     runs-on: self-hosted
+    
     steps:
-      - name: Hello World
-        run: echo "Раннер работает!"
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python
+        run: |
+          echo "Adding Python to PATH"
+          export PATH="$PATH:/usr/local/bin:/Library/Frameworks/Python.framework/Versions/3.9/bin"
+          python3 -m ensurepip --upgrade
+          python3 -m pip --version
+      
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install pytest flask
+      
+      - name: Run tests
+        run: pytest test_app.py -v
